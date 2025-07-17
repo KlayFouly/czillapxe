@@ -40,14 +40,14 @@ mkdir -p "$czillaMainDir"
 mkdir -p "$czillaTmpDir"
 mkdir -p "$czillaBackupDir"
 mkdir -p "$(dirname "$czillaServiceLog")"
-
+mv clonezilla "$pxeConfigDir/clonezilla"
 
 # Création des scripts
 echo "Création des scripts..."
 
 mv ./scripts/czillapxe.sh /usr/local/bin/czillapxe
-mv ./scripts/autoconfig.sh /opt/czillapxe/scripts/autoconfig.sh
-mv ./scripts/czillapxe_service.sh /opt/czillapxe/scripts/czillapxe_service.sh
+mv ./scripts/autoconfig.sh /opt/czillapxe/scripts/autoconfig
+mv ./scripts/czillapxe_service.sh /opt/czillapxe/scripts/czillapxe_service
 
 # Modification du fichier ~/.bashrc pour ajouter l'autocomplétion
 
@@ -102,7 +102,7 @@ After=local-fs.target
 
 [Service]
 Type=simple
-ExecStart=/opt/czillapxe/scripts/czillapxe_service.sh
+ExecStart=/opt/czillapxe/scripts/czillapxe_service
 User=root
 WorkingDirectory=$czillaMainDir
 StandardOutput=append:$czillaServiceLog

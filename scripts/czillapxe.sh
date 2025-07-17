@@ -95,7 +95,7 @@ add() {
 autoconfig() {
     echo "Génération de la configuration..."
     # Ici, tu peux ajouter le code pour générer la configuration
-    /opt/czillapxe/script/autoconfig
+    /opt/czillapxe/scripts/autoconfig
 }
 
 help() {
