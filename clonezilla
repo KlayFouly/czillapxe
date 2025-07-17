@@ -1,0 +1,99 @@
+UI vesamenu.c32
+
+PROMPT 0
+TIMEOUT 30000
+
+MENU RESOLUTION 800 600
+MENU BACKGROUND backgroundpxe.png
+MENU TABMSG !! Only use [TAB] if you know what you are doing ? !!
+MENU PASSPROMPT This place is dangerous, we need your password
+
+MENU WIDTH 98
+MENU MARGIN 0
+
+MENU COLOR screen 40
+#MENU COLOR title 30;44
+MENU COLOR title       1;32;40	#f7a940 #352b7e none
+MENU COLOR border 1;32;40	#f7a940 #352b7e none
+MENU COLOR sel 32;40		#352b7e #f7a940 none
+MENU COLOR unsel 1;32;40	#f7a940 #352b7e none
+MENU COLOR hotkey 1;4;32;40	#ff4500 #352b7e none
+MENU COLOR disabled 1;4;32;40	#f7a940 #352b7e none
+MENU COLOR help 1;32;40		#352b7e
+MENU COLOR tabmsg 1;31;40	#ff2a00
+MENU COLOR hotsel 1;4;32;40	#ff4500 #f7a940 none
+
+DEFAULT clonezilla_main
+
+MENU TITLE *+* Clonezilla Automated *+*
+
+LABEL clonezilla_main
+	MENU LABEL ^1. Start Clonezilla
+	TEXT HELP
+	Start Clonezilla Vanilla
+	ENDTEXT
+	KERNEL Clonezilla-live-vmlinuz
+	APPEND initrd=Clonezilla-live-initrd.img boot=live union=overlay locales=fr_FR.UTF-8 keyboard-layouts=fr root=/dev/nfs netboot=nfs nfsroot=ip_de_votre_serveur_pxe:/tftpboot/node_root/clonezilla-live/ ocs_repository="smb://clonezilla:clonezilla@ip_de_votre_serveur_smb/partage/"
+
+LABEL clonezilla-goupil
+	MENU LABEL ^2. Start Clone Process
+	TEXT HELP
+	Clone la distribution GOUPIL sur le disque /dev/sda de votre pc
+	ENDTEXT
+	KERNEL Clonezilla-live-vmlinuz	
+	APPEND initrd=Clonezilla-live-initrd.img username=user boot=live union=overlay locales=fr_FR.UTF-8 keyboard-layouts=fr root=/dev/nfs netboot=nfs nfsroot=ip_de_votre_serveur_pxe:/tftpboot/node_root/clonezilla-live/ ocs_repository="smb://clonezilla:clonezilla@ip_de_votre_serveur_smb/partage/" ocs_live_run="ocs-sr -batch -scr -r -g auto -e1 auto -e2 -j2 -k1 -p poweroff restoredisk ask_user ask_user"
+
+LABEL clonezilla-img
+	MENU LABEL ^3. Create image
+	TEXT HELP
+	Creer une image de votre disque sda
+	ENDTEXT
+	KERNEL Clonezilla-live-vmlinuz
+	APPEND initrd=Clonezilla-live-initrd.img boot=live union=overlay locales=fr_FR.UTF-8 keyboard-layouts=fr netboot=nfs root=/dev/nfs nfsroot=ip_de_votre_serveur_pxe:/tftpboot/node_root/clonezilla-live ocs_repository="smb://clonezilla:clonezilla@ip_de_votre_serveur_smb/partage/" ocs_live_run="ocs-sr -b -sc -sfsck -c -p poweroff savedisk ask_user ask_user"
+
+MENU SEPARATOR
+
+LABEL Choose Your OS
+	MENU DISABLE
+
+# DO NOT REMOVE THIS LINE !!
+
+LABEL 2025-07-15-14-img
+    MENU LABEL 2025-07-15-14-img
+    KERNEL Clonezilla-live-vmlinuz
+    APPEND initrd=Clonezilla-live-initrd.img username=user boot=live union=overlay locales=fr_FR.UTF-8 keyboard-layouts=fr root=/dev/nfs netboot=nfs nfsroot=ip_de_votre_serveur_pxe:/tftpboot/node_root/clonezilla-live/ ocs_repository=smb://clonezilla:clonezilla@ip_de_votre_serveur_smb/partage/ ocs_live_run=ocs-sr -batch -scr -r -g auto -e1 auto -e2 -j2 -k1 -p poweroff restoredisk 2025-07-15-14-img ask_user
+
+
+LABEL Dev3mpty_11072025
+    MENU LABEL Dev3mpty_11072025
+    KERNEL Clonezilla-live-vmlinuz
+    APPEND initrd=Clonezilla-live-initrd.img username=user boot=live union=overlay locales=fr_FR.UTF-8 keyboard-layouts=fr root=/dev/nfs netboot=nfs nfsroot=ip_de_votre_serveur_pxe:/tftpboot/node_root/clonezilla-live/ ocs_repository=smb://clonezilla:clonezilla@ip_de_votre_serveur_smb/partage/ ocs_live_run=ocs-sr -batch -scr -r -g auto -e1 auto -e2 -j2 -k1 -p poweroff restoredisk Devempty_11072025 ask_user
+
+# DO NOT REMOVE THIS LINE NOR THE NEXT !!
+# Fin du bloc d automatisation
+
+MENU SEPARATOR
+
+LABEL back_to_main
+	MENU LABEL Retour au menu principal
+	TEXT HELP
+	Retourner au menu principal
+	ENDTEXT
+	KERNEL vesamenu.c32
+	APPEND pxelinux.cfg/default
+
+MENU SEPARATOR
+
+MENU SEPARATOR
+
+LABEL Dev Zone
+	MENU DISABLE
+
+LABEL reload
+	MENU INDENT 3
+	MENU LABEL Reload current menu (DEV ONLY)
+	TEXT HELP
+	Refresh the current menu to apply pending changes
+	ENDTEXT
+	KERNEL vesamenu.c32
+	APPEND pxelinux.cfg/clonezilla.cfg
