@@ -1,49 +1,16 @@
 #!/bin/bash
 
+source /opt/czillapxe/scripts/logger
 source /etc/czillapxe/czillapxe.cfg
+source /opt/czillapxe/scripts/czillapxe_tools
 
-using=/opt/czilla/scripts/autoconfig
 if [ ! -f "$czillaPxeMenu" ]; then
-    echo "Le fichier de configuration $czillaPxeMenu n'existe pas."
+    do_log "ERROR Le fichier de configuration $czillaPxeMenu n'existe pas."
     exit 1
 fi
 
 addImage=false
 imagePath="/srv/partage/clonezilla/"
-
-
-# AUTOCOMPLETION add this to ~/.bashrc
-# if you want to use autocompletion for czillapxe.sh
-# Put this function in your .bashrc file or any other script that is sourced by your shell.
-# Then move this script to a directory in your PATH, e.g., /usr/local/bin or ~/bin.
-
-# _czilla_completions() {
-#     local cur prev opts
-#     COMPREPLY=()
-#     cur="${COMP_WORDS[COMP_CWORD]}"
-#     prev="${COMP_WORDS[COMP_CWORD-1]}"
-#     opts="add autoconfig help version"
-
-#     if [[ ${cur} == -* ]]; then
-#         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-#     else
-#         case "${prev}" in
-#             add)
-#                 COMPREPLY=( $(compgen -W "--image --name" -- ${cur}) )
-#                 ;;
-#             autoconfig|help|version)
-#                 COMPREPLY=()
-#                 ;;
-#             *)
-#                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-#                 ;;
-#         esac
-#     fi
-#     return 0
-# }
-#
-# complete -F _czilla_completions czillapxe.sh
-
 
 
 add() {
@@ -64,7 +31,7 @@ add() {
                     exit 1
                 fi
                 if [ ! -d "$imagePath/$2" ]; then
-                    echo "Erreur: le répertoire $imagePath/$2 n'existe pas."
+                    do_log "ERROR 4x001 le répertoire $imagePath/$2 n'existe pas."
                     exit 1
                 fi
                 imageName="$2"
@@ -89,13 +56,17 @@ add() {
         exit 1
     fi
     # Process to Add image to pxe menu start here
-    echo "Ajout de l'image '$imageName' avec le nom de menu '$menuName'."
+    do_log "INFO 4x000 => Ajout de l'image '$imageName' avec le nom de menu '$menuName'."
 }
 
 autoconfig() {
-    echo "Génération de la configuration..."
+    do_log "INFO 5x => Génération de la configuration..."
     # Ici, tu peux ajouter le code pour générer la configuration
     /opt/czillapxe/scripts/autoconfig
+    if [ $? -ne 0 ]; then
+        do_log "ERROR 5x001 => Échec de l'appelle du script autoconfig."
+        exit 1
+    fi
 }
 
 help() {
@@ -149,7 +120,7 @@ if $addImage; then
         exit 1
     fi
     # Ici, tu peux ajouter le code pour ajouter l'image
-    echo "Ajout de l'image '$imageName' avec le nom de menu '$menuName'."
+    do_log "INFO Ajout de l'image '$imageName' avec le nom de menu '$menuName'."
 fi
 
 

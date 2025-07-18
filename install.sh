@@ -48,6 +48,9 @@ echo "Création des scripts..."
 mv ./scripts/czillapxe.sh /usr/local/bin/czillapxe
 mv ./scripts/autoconfig.sh /opt/czillapxe/scripts/autoconfig
 mv ./scripts/czillapxe_service.sh /opt/czillapxe/scripts/czillapxe_service
+mv ./scripts/czillapxe_tools.sh /opt/czillapxe/scripts/czillapxe_tools
+mv ./scripts/czilla_add.sh /opt/czillapxe/scripts/czilla_add
+mv ./scripts/logger.sh /opt/czillapxe/scripts/logger
 
 # Modification du fichier ~/.bashrc pour ajouter l'autocomplétion
 

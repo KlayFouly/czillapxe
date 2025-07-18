@@ -1,43 +1,28 @@
 #!/bin/bash
 
+source /opt/czillapxe/scripts/logger
 source /etc/czillapxe/czillapxe.cfg
+source /opt/czillapxe/scripts/czillapxe_tools
 
 
 function StartAutoConfig() {
 
     if [ ! -f "$czillaPxeMenu" ]; then
-        echo "Le fichier de configuration $czillaPxeMenu n'existe pas."
-        exit 1
+        do_log "ERROR 0x001 => Le fichier de configuration $czillaPxeMenu n'existe pas."
+        return 1
     fi
 
     # Check if imagePath is set
     if [ -z "$czillaImageDir" ]; then
-        echo "Le chemin de l'image n'est pas défini dans le fichier de configuration."
-        exit 1
+        do_log "ERROR 0x002 Le chemin de l'image n'est pas défini dans le fichier de configuration."
+        return 1
     fi
     # Check if imagePath exists
     if [ ! -d "$czillaImageDir" ]; then
-        echo "Le chemin de l'image $imagePath n'existe pas."
-        exit 1
+        do_log "ERROR 0x003 Le chemin de l'image $imagePath n'existe pas."
+        return 1
     fi
 }
-
-function PxeBackup() {
-    if [[ ! -d "$pxeConfigDir" ]]; then
-        echo "Le répertoire de configuration PXE $pxeConfigDir n'existe pas."
-        exit 1
-    fi
-    
-    date=$(date +%d%m%Y_%H%M%S)
-    tar -czvf "$czillaBackupDir/clonezillacfg_backup_$date.tar.gz" "$pxeConfigDir"
-    
-    if [ $? -ne 0 ]; then
-        echo "Échec de la sauvegarde du répertoire de configuration PXE."
-        exit 1
-    fi
-    echo "Sauvegarde du répertoire de configuration PXE effectuée avec succès."
-}
-
 
 function CreateTempPxeMenu() {
     > "$entriesFile"
@@ -47,7 +32,7 @@ function CreateTempPxeMenu() {
         
         CheckImage "$menuName"
         if [ $? -eq 1 ]; then
-            echo "Image $menuName already exists in the entries file, skipping."
+            do_log "INFO Image $menuName already exists in the entries file, skipping."
             continue
         fi
         cat >> $entriesFile << EOF
@@ -58,6 +43,11 @@ LABEL $menuName
     APPEND initrd=Clonezilla-live-initrd.img username=user boot=live union=overlay locales=fr_FR.UTF-8 keyboard-layouts=fr root=/dev/nfs netboot=nfs nfsroot=172.16.128.102:/tftpboot/node_root/clonezilla-live/ ocs_repository=smb://clonezilla:clonezilla@172.16.128.102/partage/ ocs_live_run=ocs-sr -batch -scr -r -g auto -e1 auto -e2 -j2 -k1 -p poweroff restoredisk $menuName ask_user
 
 EOF
+    if [ $? -ne 0 ]; then
+        do_log "ERROR 2x001 Échec de l'ajout de l'image $menuName au fichier d'entrées."
+        return 1
+    fi
+    do_log "OK 2x000 Image $menuName ajoutée au fichier d'entrées."
     done
 }
 
@@ -82,14 +72,33 @@ function UpdatePxeMenu() {
     ' "$czillaPxeMenu" | tee "$czillaTmpMenu"  > /dev/null
     mv $czillaTmpMenu "$czillaPxeMenu"
     if [ $? -ne 0 ]; then
-        echo "Échec de la mise à jour du menu PXE."
-        exit 1
+        do_log "ERROR 3x001 Échec Lors de la modification du fichier $czillaPxeMenu."
+        return 1
     fi
     rm $entriesFile
-    echo "Le menu PXE a été mis à jour avec succès."
+    if [ $? -ne 0 ]; then
+        do_log "WARNING 3x002 Échec de la suppression du fichier temporaire $entriesFile."
+    fi
+    do_log "INFO Le fichier $czillaPxeMenu a été mis à jour avec succès."
 }
 
 StartAutoConfig
+if [ $? -ne 0 ]; then
+    do_log "FATAL 0x111 Échec de l'initialisation de CZillaPXE."
+    exit 1
+fi
 PxeBackup
+if [ $? -ne 0 ]; then
+    do_log "FATAL 1x111 Échec de la sauvegarde du répertoire de configuration PXE."
+    exit 1
+fi
 CreateTempPxeMenu
+if [ $? -ne 0 ]; then
+    do_log "FATAL 2x111 Échec de la création du fichier temporaire d'entrées."
+    exit 1
+fi
 UpdatePxeMenu
+if [ $? -ne 0 ]; then
+    do_log "FATAL 3x111 Échec de la mise à jour du fichier de configuration PXE."
+    exit 1
+fi
