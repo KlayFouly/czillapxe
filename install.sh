@@ -10,26 +10,44 @@ cancelInstall() {
     exit 1
 }
 
-echo "Veuillez entrer l'addresse ip de votre serveur NFS :"
-read nfs_ip
+
+while nfs_ip == ""; do
+    echo "Veuillez entrer l'addresse ip de votre serveur NFS :"
+    read nfs_ip
+    if [ -z "$nfs_ip" ]; then
+        echo "L'adresse IP ne peut pas être vide. Veuillez réessayer."
+    fi
+done
 
 sleep 1
 
-echo "Veuillez entrer l'addresse ip de votre Serveur de stockage SMB"
-read smb_ip
+while smb_ip == ""; do
+    echo "Veuillez entrer l'addresse ip de votre Serveur de stockage SMB :"
+    read smb_ip
+    if [ -z "$smb_ip" ]; then
+        echo "L'adresse IP ne peut pas être vide. Veuillez réessayer."
+    fi
+done
 
 sleep 1
 
-echo "Veuillez entrer le nom de votre partage SMB"
-read smb_share
+while smb_share == ""; do
+    echo "Veuillez entrer le nom de votre partage SMB :"
+    read smb_share
+    if [ -z "$smb_share" ]; then
+        echo "Le nom du partage SMB ne peut pas être vide. Veuillez réessayer."
+    fi
+done
 
 sleep 1
 
-echo "Veuillez entrer le chemin de votre dossier de configuration du menu PXE (/tftpboot/pxelinux.cfg/) :"
-read pxeConfigDir
-if [ $pxeConfigDir == "" ]; then
-    pxeConfigDir="/tftpboot/pxelinux.cfg/"
-fi
+while pxeConfigDir == ""; do
+    echo "Veuillez entrer le chemin de votre dossier de configuration du menu PXE (/tftpboot/pxelinux.cfg) :"
+    read pxeConfigDir
+    if [ -z "$pxeConfigDir" ]; then
+        echo "Le chemin du dossier de configuration PXE ne peut pas être vide. Veuillez réessayer."
+    fi
+done
 
 mkdir -p "/etc/czillapxe"
 touch "/etc/czillapxe/czillapxe.cfg"
@@ -60,6 +78,11 @@ czillaTmpMenu="/opt/czillapxe/tmp/clonezilla.tmp"
 entriesFile="/opt/czillapxe/tmp/clonezilla_entries.tmp"
 EOF
 
+cat << EOF > /etc/czillapxe/.smbcredentials
+username=clonezilla
+password=clonezilla
+EOF
+
 source /etc/czillapxe/czillapxe.cfg
 echo "Initialisation de CZillaPXE..."
 
@@ -72,6 +95,8 @@ mkdir -p "$czillaTmpDir"
 mkdir -p "$czillaBackupDir"
 mkdir -p "$(dirname "$czillaServiceLog")"
 mv clonezilla "$pxeConfigDir/clonezilla"
+touch $czillaConfigDir/.credentials
+
 
 # Création des scripts
 echo "Création des scripts..."
@@ -85,14 +110,20 @@ mv ./scripts/logger.sh /opt/czillapxe/scripts/logger
 
 
 echo "Création du point de montage czillapxe"
-mkdir -p /srv/partage/clonezilla
+if [ ! -d "/srv/partage/clonezilla" ]; then
+    mkdir -p /srv/partage/clonezilla
+fi
 mount -t cifs -o username=clonezilla,password=clonezilla //$smb_ip/$smb_share /srv/partage/clonezilla
 if [ $? -ne 0 ]; then
     echo "Erreur lors du montage du partage SMB. Veuillez vérifier les informations de connexion."
-    
+
     cancelInstall
     exit 1
 fi
+
+# Modification du fichier fstab pour ajouter montage automatique
+
+echo "//$smb_ip/$smb_share /srv/partage/clonezilla cifs credentials=$czillaConfigDir/.smbcredentials,uid=1000,gid=1000,iocharset=utf8 0 0" >> /etc/fstab
 
 # Modification du fichier ~/.bashrc pour ajouter l'autocomplétion
 

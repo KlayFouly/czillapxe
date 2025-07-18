@@ -11,6 +11,8 @@ fi
 
 addImage=false
 
+## TO DO Créer reconfigure option
+
 
 add() {
     # Parsing des options pour la sous-commande add

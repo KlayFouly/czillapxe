@@ -26,6 +26,9 @@ function CreateTempPxeMenu() {
 
 LABEL $menuName
     MENU LABEL $menuName
+    TEXT HELP
+        Clonage de l'image $menuName sur le disque dur de votre choix.
+    ENDTEXT
     KERNEL Clonezilla-live-vmlinuz
     APPEND initrd=Clonezilla-live-initrd.img username=user boot=live union=overlay locales=fr_FR.UTF-8 keyboard-layouts=fr root=/dev/nfs netboot=nfs nfsroot=$czillaNfsIp:/tftpboot/node_root/clonezilla-live/ ocs_repository=smb://clonezilla:clonezilla@$czillaSmbIp/$czillaSmbShare/ ocs_live_run=ocs-sr -batch -scr -r -g auto -e1 auto -e2 -j2 -k1 -p poweroff restoredisk $menuName ask_user
 
@@ -62,13 +65,18 @@ function add_image() {
 
 
 
-PxeBackup()
+PxeBackup
 if [ $? -ne 0 ]; then
     do_log "FATAL $0 1x111 Échec de la sauvegarde du répertoire de configuration PXE."
     exit 1
 fi
-add_image()
+CreateTempPxeMenu
 if [ $? -ne 0 ]; then
-    do_log "FATAL $0 2x111 Échec de l'ajout de l'image au menu PXE."
+    do_log "FATAL $0 2x111 Échec de la création du fichier temporaire d'entrées."
+    exit 1
+fi
+add_image
+if [ $? -ne 0 ]; then
+    do_log "FATAL $0 3x111 Échec de l'ajout de l'image au menu PXE."
     exit 1
 fi
