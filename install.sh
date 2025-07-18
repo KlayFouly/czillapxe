@@ -10,9 +10,14 @@ cancelInstall() {
     exit 1
 }
 
+nfs_ip=""
+smb_ip=""
+smb_share=""
+pxeConfigDir=""
 
-while nfs_ip == ""; do
-    echo "Veuillez entrer l'addresse ip de votre serveur NFS :"
+
+while [ -z "$nfs_ip" ]; do
+    echo "Veuillez entrer l'adresse IP de votre serveur NFS :"
     read nfs_ip
     if [ -z "$nfs_ip" ]; then
         echo "L'adresse IP ne peut pas être vide. Veuillez réessayer."
@@ -21,8 +26,8 @@ done
 
 sleep 1
 
-while smb_ip == ""; do
-    echo "Veuillez entrer l'addresse ip de votre Serveur de stockage SMB :"
+while [ -z "$smb_ip" ]; do
+    echo "Veuillez entrer l'adresse IP de votre Serveur de stockage SMB :"
     read smb_ip
     if [ -z "$smb_ip" ]; then
         echo "L'adresse IP ne peut pas être vide. Veuillez réessayer."
@@ -31,7 +36,7 @@ done
 
 sleep 1
 
-while smb_share == ""; do
+while [ -z "$smb_share" ]; do
     echo "Veuillez entrer le nom de votre partage SMB :"
     read smb_share
     if [ -z "$smb_share" ]; then
@@ -41,7 +46,7 @@ done
 
 sleep 1
 
-while pxeConfigDir == ""; do
+while [ -z "$pxeConfigDir" ]; do
     echo "Veuillez entrer le chemin de votre dossier de configuration du menu PXE (/tftpboot/pxelinux.cfg) :"
     read pxeConfigDir
     if [ -z "$pxeConfigDir" ]; then
@@ -101,13 +106,14 @@ touch $czillaConfigDir/.credentials
 # Création des scripts
 echo "Création des scripts..."
 
+chmod +x ./scripts/*
 mv ./scripts/czillapxe.sh /usr/local/bin/czillapxe
 mv ./scripts/czillapxe_autoconfig.sh /opt/czillapxe/scripts/czillapxe_autoconfig
 mv ./scripts/czillapxe_service.sh /opt/czillapxe/scripts/czillapxe_service
 mv ./scripts/czillapxe_tools.sh /opt/czillapxe/scripts/czillapxe_tools
 mv ./scripts/czillapxe_add.sh /opt/czillapxe/scripts/czillapxe_add
 mv ./scripts/logger.sh /opt/czillapxe/scripts/logger
-
+mv ./clonezilla $pxeConfigDir/clonezilla
 
 echo "Création du point de montage czillapxe"
 if [ ! -d "/srv/partage/clonezilla" ]; then
