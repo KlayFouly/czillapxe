@@ -56,6 +56,7 @@ MENU SEPARATOR
 LABEL Choose Your OS
 	MENU DISABLE
 
+# Debut du bloc d automatisation
 # DO NOT REMOVE THIS LINE !!
 
 LABEL 2025-07-15-14-img
@@ -71,6 +72,16 @@ LABEL Dev3mpty_11072025
 
 # DO NOT REMOVE THIS LINE NOR THE NEXT !!
 # Fin du bloc d automatisation
+
+
+MENU SEPARATOR
+LABEL CustomImages
+	MENU DISABLE
+
+# CUSTOM IMAGES
+
+
+# END CUSTOM IMAGES
 
 MENU SEPARATOR
 

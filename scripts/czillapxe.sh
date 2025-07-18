@@ -10,19 +10,22 @@ if [ ! -f "$czillaPxeMenu" ]; then
 fi
 
 addImage=false
-imagePath="/srv/partage/clonezilla/"
 
 
 add() {
     # Parsing des options pour la sous-commande add
-    OPTIONS=$(getopt -o i:n: --long image:,name: -- "$@")
+    local imagePath="/srv/partage/clonezilla/"
+    local imagePath=""
+    local menuName=""
+    
+    OPTIONS=$(getopt -o i:n:p: --long image:,name:,path: -- "$@")
     if [ $? -ne 0 ]; then
         echo "Erreur dans les paramètres de la sous-commande add."
         exit 1
     fi
+    
     eval set -- "$OPTIONS"
-    imageName=""
-    menuName=""
+    
     while true; do
         case "$1" in
             -i|--image)
@@ -34,11 +37,19 @@ add() {
                     do_log "ERROR 4x001 le répertoire $imagePath/$2 n'existe pas."
                     exit 1
                 fi
-                imageName="$2"
+                imagePath="$2"
                 shift 2
                 ;;
             -n|--name)
                 menuName="$2"
+                shift 2
+                ;;
+            -p|--path)
+                if [ -z "$2" ]; then
+                    echo "Erreur: l'option -p/--path nécessite un argument."
+                    exit 1
+                fi
+                imagePath="$2"
                 shift 2
                 ;;
             --)
@@ -50,14 +61,24 @@ add() {
                 ;;
         esac
     done
+
     # Vérification des options
     if [ -z "$imageName" ] || [ -z "$menuName" ]; then
         echo "Erreur : les options --image <nom_image_à_ajouter> et --name <nom_dans_menu_pxe> sont obligatoires."
         exit 1
     fi
+
     # Process to Add image to pxe menu start here
     do_log "INFO 4x000 => Ajout de l'image '$imageName' avec le nom de menu '$menuName'."
+    
+    /opt/czillapxe/scripts/czillapxe_add "$imagePath" "$imageName" "$menuName"
+    if [ $? -ne 0 ]; then
+        do_log "ERROR 4x002 => Échec de l'ajout de l'image $imageName au menu PXE."
+        exit 1
+    fi
 }
+
+
 
 autoconfig() {
     do_log "INFO 5x => Génération de la configuration..."
@@ -111,20 +132,6 @@ case "$1" in
         exit 1
         ;;
 esac
-
-
-# Vérification des dépendances d'options
-if $addImage; then
-    if [ -z "$imageName" ] || [ -z "$menuName" ]; then
-        echo "Erreur : les options -i <nom_de_l'image> et -n <nom_de_l'entrée> sont obligatoires avec -a."
-        exit 1
-    fi
-    # Ici, tu peux ajouter le code pour ajouter l'image
-    do_log "INFO Ajout de l'image '$imageName' avec le nom de menu '$menuName'."
-fi
-
-
-
 
 # --- IGNORE ---
 

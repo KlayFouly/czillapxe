@@ -18,6 +18,9 @@
 source /etc/czillapxe/czillapxe.cfg
 
 do_log(){
+    PRODUCT="{czillapxe}"
+    host_name=$(hostname -s)
+
     print_ok() {
         GREEN_COLOR="\033[0;32m"
         DEFAULT="\033[0m"
